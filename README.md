@@ -163,7 +163,7 @@ In the filter.py file, EKF is used.
 - The Kalman gain is computed and is used for updating the state and covariance.
 
 This is shown in the followin image
-![img1](images/kalman.png)
+![img1](images/kalman.PNG)
 
 The analysis of rmse with current time is shown in the below image (single tracking).
 
@@ -184,7 +184,7 @@ The following steps were taken for this:
 - If the score is below certain three-point and the state balance is greater than a threshold , then the track is not removed for further consideration.
 
 This is shown in the trackmanagement.py script:
-![img1](images/trackmanagement.png)
+![img1](images/trackmanagement.PNG)
 
 
 The following image shows the rmse plot for single tracking .
