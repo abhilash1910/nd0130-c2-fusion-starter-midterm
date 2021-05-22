@@ -201,7 +201,9 @@ The following steps have been taken:
 - We calculate the distance of Mahalanobis Distance for each track measurement.
 - To exclude unlikely track pairs, use the hypothesis test Chi-Square.
 - We choose the pair with the smallest Mahalanobis Distance, update Kalman Filter, and delete the relation matrix with the appropriate row and column.
+- A measurement lies inside a track's gate if the Mahalanobis distance is smaller than the threshold calculated from the inverse cumulative chi squared dstribution. 
 
+  distribution
 The following image shows the MHD being applied for getting the closest track measurement:
 ![img1](images/closesttrack.PNG)
 
