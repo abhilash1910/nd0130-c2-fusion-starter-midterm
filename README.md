@@ -213,7 +213,7 @@ The following graph is plotted.
 
 The following graph shows the rmse with data association:
 
-![step3](images/rmse_tracking_3.png)
+![step3](images/rmse_tracking3.png)
 
 
 ## Step-4: Camera Sensor fusion
