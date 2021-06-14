@@ -181,6 +181,7 @@ The range image sample:
 
 ![img1](img/range_img.png)
 
+![img1](img/range_img2.png)
 
 For the next part, we use the Open3D library to display the lidar point cloud on a 3D viewer and identify 10 images from point cloud
 - Visualize the point cloud in Open3D
@@ -235,7 +236,6 @@ The changes are in the 'loop_over_dataset.py'
 The changes are also in the "objdet_pcl.py"
 
 ![img1](img/id_s2e12.png)
-
 
 A sample preview of the BEV:
 
@@ -307,6 +307,7 @@ The changes for "objdet_eval.py" where the precision and recall are calculated a
 The precision recall curve is plotted showing similar results of precision =0.996 and recall=0.81372
 
 ![img1](img/pre-recall.png)
+
 
 In the next step, we set the 
 ```python

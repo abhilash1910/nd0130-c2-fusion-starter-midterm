@@ -46,6 +46,9 @@ The range image sample:
 
 ![img1](img/range_img.png)
 
+![img1](img/range_img2.png)
+
+
 
 For the next part, we use the Open3D library to display the lidar point cloud on a 3D viewer and identify 10 images from point cloud
 - Visualize the point cloud in Open3D
