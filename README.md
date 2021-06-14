@@ -135,16 +135,21 @@ Parts of this project are based on the following repositories:
 
 # Self-Driving Car Beta Testing Nanodegree 
 
-This is a template submission for the  second course in the  [Udacity Self-Driving Car Engineer Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213) : Sensor Fusion and Tracking. 
+This is a template submission for the midterm second course in the  [Udacity Self-Driving Car Engineer Nanodegree Program](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213) : 3D Object Detection (Midterm). 
 
 
-## Sensor Fusion and Object detection
+## 3D Object detection
 
-We have used the [Waymo Open Dataset's](https://console.cloud.google.com/storage/browser/waymo_open_dataset_v_1_2_0_individual_files) real-world data and applied an extended Kalman fusion filter for tracking several vehicles in this project. The following are the tasks completed:
-- Building Kalman Filter system to track an object
-- Object tracking and updating tracks (creating and deleting)
-- Understanding the association between the data (sensor)
-- Added camera sensor fusion based on lidar fusion 
+We have used the [Waymo Open Dataset's](https://console.cloud.google.com/storage/browser/waymo_open_dataset_v_1_2_0_individual_files) real-world data and used 3d point cloud for lidar based object detection. 
+
+- Configuring the ranges channel to 8 bit and view the range /intensity image (ID_S1_EX1)
+- Use the Open3D library to display the lidar point cloud on a 3d viewer and identifying 10 images from point cloud.(ID_S1_EX2)
+- Create Birds Eye View perspective (BEV) of the point cloud,assign lidar intensity values to BEV,normalize the heightmap of each BEV (ID_S2_EX1,ID_S2_EX2,ID_S2_EX3)
+- In addition to YOLO, use the [repository](https://review.udacity.com/github.com/maudzung/SFA3D) and add parameters ,instantiate fpn resnet model(ID_S3_EX1)
+- Convert BEV coordinates into pixel coordinates and convert model output to bounding box format  (ID_S3_EX2)
+- Compute intersection over union, assign detected objects to label if IOU exceeds threshold (ID_S4_EX1)
+- Compute false positives and false negatives, precision and recall(ID_S4_EX2,ID_S4_EX3)
+
 
 The project can be run by running 
 
@@ -153,101 +158,166 @@ python loop_over_dataset.py
 ```
 All training/inference is done on GTX 2060 in windows 10 machine.
 
-## Step-1: Extended Kalman Filter
 
-In the filter.py file, EKF is used.
+## Step-1: Compute Lidar point cloud from Range Image
 
-- We first design the system states [x, y, z, vx, vy, vz], process model, and constant velocity model.
-- Then we calculate the matrix (system matrix) for the 3D process models with constant velocity and noise covariances. This is required for computing state h(x) and Jacobian H
-- For current state calculation, h(x), and the Jacobian H function are evaluated.
-- The Kalman gain is computed and is used for updating the state and covariance.
+In this we are first previewing the range image and convert range and intensity channels to 8 bit format. After that, we use the openCV library to stack the range and intensity channel vertically to visualize the image.
 
-This is shown in the followin image
-![img1](images/kalman.PNG)
+- Convert "range" channel to 8 bit
+- Convert "intensity" channel to 8 bit
+- Crop range image to +/- 90 degrees  left and right of forward facing x axis
+- Stack up range and intensity channels vertically in openCV
 
-The analysis of rmse with current time is shown in the below image (single tracking).
+The changes are made in 'loop_over_dataset.py'
+![img1](img/id_s1e1.png)
 
-![step1](images/single_target_Tracking_rmse.png)
+![img1](img/id_s1e12.png)
 
+The changes are made in "objdet_pcl.py"
 
-## Step-2: Track Management
+![img1](img/id_s1e13.png)
 
-The track management is analysed next, and the tracklist can handle several objects. One object is shown as a track in the device architecture.
-We transfer the track and measurement details to Kalman filter to update the particular worker on the track.
+The range image sample:
 
-
-The following steps were taken for this:
-
-- The track is first initialized with unassigned lidar calculation
-- If the scores on the track are correlated with measurement, then the corresponding scores will be increased and vice versa
-- There is a track ranking which changes the conditions of the track.
-- If the score is below certain three-point and the state balance is greater than a threshold , then the track is not removed for further consideration.
-
-This is shown in the trackmanagement.py script:
-![img1](images/trackmanagement.PNG)
+![img1](img/range_img.png)
 
 
-The following image shows the rmse plot for single tracking .
+For the next part, we use the Open3D library to display the lidar point cloud on a 3D viewer and identify 10 images from point cloud
+- Visualize the point cloud in Open3D
+- 10 examples from point cloud  with varying degrees of visibility
 
-![step2](images/single_target_tracking_2.png)
+The changes are made in 'loop_over_dataset.py'
+![img1](img/id_s1e2.png)
 
-
-## Step-3: Data Association
-
-In this step, the closest neighbor association correctly matches several measurements to several tracks. In association.py, data association is introduced.
-The following steps have been taken:
-
-- We build  a matrix with all tracks and overviews open.
-- We calculate the distance of Mahalanobis Distance for each track measurement.
-- To exclude unlikely track pairs, use the hypothesis test Chi-Square.
-- We choose the pair with the smallest Mahalanobis Distance, update Kalman Filter, and delete the relation matrix with the appropriate row and column.
-- A measurement lies inside a track's gate if the Mahalanobis distance is smaller than the threshold calculated from the inverse cumulative chi squared dstribution. 
-
-  distribution
-The following image shows the MHD being applied for getting the closest track measurement:
-![img1](images/closesttrack.PNG)
-
-The following graph is plotted.
-
-![step3](images/3_target_Tracking.png)
-
-The following graph shows the rmse with data association:
-
-![step3](images/rmse_tracking3.png)
+The changes are made in "objdet_pcl.py"
+![img1](img/id_s1e21.png)
 
 
-## Step-4: Camera Sensor fusion
+Point cloud images
 
-Now we will be adding to the Kalman filter.The main assumption is the center of the 3d space bounding box for a car which is following the center of the 2d imagery of the vehicle. This assertion is approximately correct, however, for a front camera does not always be accurate.
-The implementation consists of projection matrix which converts the points from 3d space into 2d geometry in the picture . We use the partial derivatives (x,y,z) for measuring the the model in parameters (u,v). The noise is also measured (R).If the tracking status is in FOV(Field of View) then we can accept the measurement-track pair else we can reject it.
+![img1](img/pc1.png)
 
+![img1](img/pc2.png)
 
-![step3_graph](images/rmse_tracking.png)
+![img1](img/pc3.png)
 
-## Difficulties Faced in Project
+![img1](img/pc4.png)
 
-The implementation of ekf, track management, data association, and camera-lidar fusion are all well guided in the lectures. However it was difficult to implement the camera measuring model. When projecting a 3d point into a 2d point, there are transformations in the camera axis. However, the coding of the project was discovered and the problem was solved.For the project, a pre-computed result is needed. However, the pre-computed result files do not correspond to the load filename of the loop_over_dataset.py file. For using the files, we  modified the filenames according to the pre-computed result. This is shown in the following lines in the "loop_over_dataset.py " file.
+![img1](img/pc5.png)
 
-![image](images/measure_detection.PNG)
-Fig: modified loop_over_dataset for pre-computed result
+![img1](img/pc6.png)
 
-## Benefits in Camera-Lidar Fusion tracking over Lidar-only tracking
+![img1](img/pc7.png)
 
-From the project, it is understandable that for a stabilized tracking, sensor fusion should combine multiple sensors. Cameras may offer textured and color/brightness/contrast based imaages that Lidar does not provide .Lidar is extremely beneficial for low brightness /visibility or in blurry conditions such as foggy/rainy weather conditions.The most important aspect of Lidar is the spatial projection which is better than a camera.Lidar can seemlessly navigate to the required orientation. Ideally a combined approach of Resnet architectures combined with Lidar can provide better results. Inclusion of camera fusion trackign can produce a better geometric project matrix for the sensors to detect and operate on.
+![img1](img/pc8.png)
 
-## Real-life challenges:
+![img1](img/pc9.png)
 
-A sensor-fusion systemcould be confronted with a variety of real-world issues such as :
-
-- Multiple tracks and measurements provide a precise correlation. The thresholds for gatting should be properly set to avoid un-necessary wrong correlations.
-- The measurement noise configuration is insufficient to provide a precise project result. In reality, rather than setting a standardized noise variance for a sensor, it's best if each measurement has its noise variance.Individual noise variances provide a better vaiation as compared to a combined variance on the sensor.
-
-This project eliminates the issue of extrinsic parameter tuning, which is one method for camera and 
-LiDAR fusion. These extrinsic parameters are defined since we are using a public dataset for this 
-experiment.
-
-## Improvement opportunity:
-
-As already stated, the project should carry out the Camera-LiDAR Fusion Monitoring. And also, A 3D measuring model of the real camera sound can assist with the fusion effect, we can fit actual 3d points in the lidar point cloud to the vehicle target pixels.It is best suited to use a camera sound for providing individual noise variances and also for better projection matrix creation.
+![img1](img/pc10.png)
 
 
+Stable features include the tail lights, the rear bumper  majorly. In some cases the additional features include the headover lights, car front lights, rear window shields. These are identified through the intensity channels . The chassis of the car is the most prominent identifiable feature from the lidar perspective. The images are analysed with different settings and the rear lights are the major stable components, also the bounding boxes are correctly assigned to the cars (used from Step-3).
+
+
+## Step-2: Creaate BEV from Lidar PCL
+
+In this case, we are:
+- Converting the coordinates to pixel values
+- Assigning lidar intensity values to the birds eye view BEV mapping
+- Using sorted and pruned point cloud lidar from the  previous task
+- Normalizing the height map in the BEV
+- Compute and map the intensity values
+
+The changes are in the 'loop_over_dataset.py'
+
+![img1](img/id_s2e1.png)
+
+The changes are also in the "objdet_pcl.py"
+
+![img1](img/id_s2e12.png)
+
+
+A sample preview of the BEV:
+
+![img1](img/bev.png)
+
+![img1](img/bev2.png)
+
+A preview of the intensity layer:
+
+The 'lidar_pcl_top' is used in this case, shown in the Figure:
+
+![img1](img/id_s2e2.png)
+
+The corresponding intensity channel:
+
+![img1](img/intensity_layer.png)
+
+The corresponding normalized height channel:
+
+
+![img1](img/height_channel.png)
+
+
+## Step-3: Model Based Object Detection in BEV Image
+
+Here we are using the cloned [repo](https://github.com/maudzung/SFA3D) ,particularly the test.py file  and extracting the relevant configurations from 'parse_test_configs()'  and added them in the 'load_configs_model' config structure.
+
+- Instantiating the fpn resnet model from the cloned repository configs
+- Extracting 3d bounding boxes from the responses
+- Transforming the pixel to vehicle coordinates
+- Model output tuned to the bounding box format [class-id, x, y, z, h, w, l, yaw]
+
+The changes are in "loop_over_dataset.py"
+
+![img1](img/id_s3e1.png)
+
+The changes for the detection are inside the "objdet_detect.py" file:
+
+![img1](img/id_s3e12.png)
+
+As the model input is a three-channel BEV map, the detected objects will be returned with coordinates and properties in the BEV coordinate space. Thus, before the detections can move along in the processing pipeline, they need to be converted into metric coordinates in vehicle space.
+
+A sample preview of the bounding box images:
+
+![img1](img/3d_bb.png)
+
+![img1](img/obj_detect.png)
+
+
+## Step-4: Performance detection for 3D Object Detection
+
+In this step, the performance is computed by getting the IOU  between labels and detections to get the false positive and false negative values.The task is to compute the geometric overlap between the bounding boxes of labels and the detected objects:
+
+- Assigning a detected object to a label if IOU exceeds threshold
+- Computing the degree of geometric overlap
+- For multiple matches objects/detections pair with maximum IOU are kept
+- Computing the false negative and false positive values
+- Computing precision and recall over the false positive and false negative values
+
+The changes in the code are:
+
+![img1](img/id_s4e1.png)
+
+The changes for "objdet_eval.py" where the precision and recall are calculated as functions of false positives and negatives:
+
+![img1](img/id_s4e12.png)
+
+
+The precision recall curve is plotted showing similar results of precision =0.996 and recall=0.81372
+
+![img1](img/pre-recall.png)
+
+In the next step, we set the 
+```python
+configs_det.use_labels_as_objects=True
+```
+ which results in precision and recall values as 1.This is shown in the following image:
+
+
+![img1](img/pre-recall_2.png)
+
+
+## Summary of Lidar based 3D Object Detection
+
+From the project, it is understandable that for a stabilized tracking, lidar should be used . The conversion of range data to point cloud through spatial volumes, or points (or CNN networks) are important for further analysis. The usage of resnet/darknet and YOLO to convert these high dimensional point cloud representations to object detections through bounding boxes is essential for 3D object detection. Evaluating the performance with help of maximal IOU mapping ,mAP, and representing the precision/recall of the bounding boxes are essential to understand the effectiveness of Lidar based detection.
