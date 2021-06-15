@@ -62,9 +62,12 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
                 box_2 = tools.compute_box_corners(x, y, w, l, yaw)
 
                 ## step 4 : computer the center distance between label and detection bounding-box in x, y, and z
-                dist_x = box.center_x - x
-                dist_y = box.center_y - y
-                dist_Z = box.center_z - z
+                dist_x = np.array(box.center_x - x).item()
+                dist_y = np.array(box.center_y - y).item()
+                dist_z = np.array(box.center_z - z).item()
+                # dist_x = box.center_x - x
+                # dist_y = box.center_y - y
+                # dist_Z = box.center_z - z
 
                 ## step 5 : compute the intersection over union (IOU) between label and detection bounding-box
                 try:
@@ -78,7 +81,7 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
                 ## step 6 : if IOU exceeds min_iou threshold, store [iou,dist_x, dist_y, dist_z] in matches_lab_det and increase the TP count
                 if iou > min_iou:
                     matches_lab_det.append([iou,dist_x, dist_y, dist_Z ])
-                    true_positives = true_positives + 1
+                    # true_positives = true_positives + 1
             #######
             ####### ID_S4_EX1 END #######     
             
@@ -101,7 +104,7 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
     all_positives = labels_valid.sum()
 
     ## step 2 : compute the number of false negatives
-
+    true_positives=len(ious)
     false_negatives = all_positives - true_positives
 
     ## step 3 : compute the number of false positives

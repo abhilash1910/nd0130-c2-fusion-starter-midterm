@@ -306,7 +306,7 @@ The changes for "objdet_eval.py" where the precision and recall are calculated a
 
 The precision recall curve is plotted showing similar results of precision =0.996 and recall=0.81372
 
-![img1](img/pre-recall.png)
+![img1](img/changed_pre-recall.png)
 
 
 In the next step, we set the 

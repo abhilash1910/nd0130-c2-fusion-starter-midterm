@@ -48,7 +48,7 @@ def show_pcl(pcl):
     idx= True
     def right_click(vis_lpc):
         global idx
-        print('right click')
+        print('right arrow pressed')
         idx= False
         return
     vis_lpc.register_key_callback(262,right_click)
